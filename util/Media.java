@@ -9,6 +9,8 @@ public class Media {
     private int duration;
     private String captionFile;
 
+    public Media() {};
+
     public Media (String name, String description, ArrayList<String> creators, int duration, String captionFile) {
         this.name = name;
         this.description = description;
