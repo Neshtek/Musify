@@ -29,56 +29,75 @@ public class MusifyApp {
         app.displayWelcomeMessage(args);
         app.runMainMenu(args);
     }
-
-    private ArrayList<String[]> readFiles (Scanner fileReader, String objectType) {
-        ArrayList<String[]> fileDetailsList = new ArrayList<>();
+/*
+if (objectType.equals("Song")) {
+    if (fileDetails.length != 6)
+        throw new InvalidLineException("Song details incomplete. Skipping this line.");
+    if (!Arrays.asList(this.genres).contains(fileDetails[3]))
+        throw new InvalidFormatException("Incorrect Genre for Song. Skipping this line.");
+} else if (objectType.equals("Podcast")) {
+    if (fileDetails.length != 8)
+        throw new InvalidLineException("Podcast details incomplete. Skipping this line.");
+    if (!Arrays.asList(this.categories).contains(fileDetails[3]))
+        throw new InvalidFormatException("Incorrect Category for Podcast. Skipping this line.");
+} else {
+    if (fileDetails.length != 5)
+        throw new InvalidLineException("ShortClip details incomplete. Skipping this line.");
+}
+*/
+    private void storePlaylists (Scanner fileReader) {
+        String[] fileDetails;
         while (fileReader.hasNextLine()) {
             try {
-                String[] fileDetails = fileReader.nextLine().split(",");
-                if (objectType.equals("Playlist")) {
-                    if (fileDetails.length != 3)
-                        throw new InvalidLineException("Invalid Playlist data. Skipping this line.");
-                    if (!Arrays.asList(this.mediaTypes).contains(fileDetails[1]))
-                        throw new InvalidFormatException("Incorrect Media Type. Skipping this line.");
-                } else if (objectType.equals("Song")) {
+                fileDetails = fileReader.nextLine().split(",");
+                if (fileDetails.length != 3)
+                    throw new InvalidLineException("Invalid Playlist data. Skipping this line.");
+                if (!Arrays.asList(this.mediaTypes).contains(fileDetails[1]))
+                    throw new InvalidFormatException("Incorrect Media Type. Skipping this line.");
+                this.playlists.add(new Playlist(fileDetails));
+            } catch (InvalidLineException e) {
+                System.err.println(e.getMessage());
+            } catch (InvalidFormatException e) {
+                System.err.println(e.getMessage());
+            }
+        }       
+    }
+
+    private void storeMedia (Scanner fileReader, String mediaType) {
+        String[] fileDetails;
+        while (fileReader.hasNextLine()) {
+            try {
+                fileDetails = fileReader.nextLine().split(",");
+                if (mediaType.equals("Song")) {
                     if (fileDetails.length != 6)
                         throw new InvalidLineException("Song details incomplete. Skipping this line.");
                     if (!Arrays.asList(this.genres).contains(fileDetails[3]))
                         throw new InvalidFormatException("Incorrect Genre for Song. Skipping this line.");
-                } else if (objectType.equals("Podcast")) {
-                    if (fileDetails.length != 8)
-                        throw new InvalidLineException("Podcast details incomplete. Skipping this line.");
-                    if (!Arrays.asList(this.categories).contains(fileDetails[3]))
-                        throw new InvalidFormatException("Incorrect Category for Podcast. Skipping this line.");
-                } else {
-                    if (fileDetails.length != 5)
-                        throw new InvalidLineException("ShortClip details incomplete. Skipping this line.");
+                } else if (mediaType.equals("Podcast")) {
+                    
                 }
-                fileDetailsList.add(fileDetails);
             } catch (InvalidLineException e) {
                 System.err.println(e.getMessage());
             } catch (InvalidFormatException e) {
                 System.err.println(e.getMessage());
             }
         }
-        return fileDetailsList;
-                
     }
 
-    @SuppressWarnings("rawtypes")
     private void handleFiles() {
         Scanner fileReader;
         try {
             fileReader = new Scanner(new FileInputStream("data/" + this.playlistListFile));
-            for (String[] playlistDetails : this.readFiles(fileReader, "Playlist"))
-                this.playlists.add(new Playlist(playlistDetails[0], playlistDetails[1], playlistDetails[2]));
+            this.storePlaylists(fileReader);
             fileReader.close();
 
             for (Playlist playlist : this.playlists) {
                 fileReader = new Scanner(new FileInputStream("data/playlist/" + playlist.getFileName()));
-                // if (playlist.)
-                // for (String[] mediaDetails : this.readFiles(fileReader)) {
-                // }
+                if (playlist.getMediaType() == "SONG") {
+                    for (String[] mediaDetails : this.storeMedia(fileReader, "Song")) {
+                        playlist.addMedia(new Song(mediaDetails));
+                    }
+                }
             }
         } catch (IOException e) {
             System.err.println(e.getMessage());

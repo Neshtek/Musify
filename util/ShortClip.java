@@ -5,7 +5,7 @@ import java.util.*;
 public class ShortClip extends Media {
     public ShortClip() {};
 
-    public ShortClip (String name, String description, ArrayList<String> creators, int duration, String captionFile) {
-        super(name, description, creators, duration, captionFile);
+    public ShortClip (String[] args) {
+        super(args[0], args[1], args[2], args[3], args[4]);
     }    
 }

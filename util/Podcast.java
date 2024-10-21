@@ -9,10 +9,10 @@ public class Podcast extends Media {
 
     public Podcast() {};
 
-    public Podcast (String name, String description, ArrayList<String> creators, String category, String seriesName, int episodeNo, int duration, String captionFile) {
-        super(name, description, creators, duration, captionFile);
-        this.category = category;
-        this.seriesName = seriesName;
-        this.episodeNo = episodeNo;
+    public Podcast (String[] args) {
+        super(args[0], args[1], args[2], args[6], args[7]);
+        this.category = args[3];
+        this.seriesName = args[4];
+        this.episodeNo = Integer.parseInt(args[5]);
     }
 }

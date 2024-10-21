@@ -10,14 +10,23 @@ public class Playlist <T extends Media> {
 
     public Playlist() {};
 
-    public Playlist (String name, String mediaType, String fileName) {
-        this.name = name;
-        this.mediaType = mediaType;
-        this.fileName = fileName;
+    public Playlist (String[] args) {
+        this.name = args[0];
+        this.mediaType = args[1];
+        this.fileName = args[2];
         this.media = new ArrayList<T>();
+
+    }
+
+    public void addMedia(T mediaObject) {
+        this.media.add(mediaObject);
     }
 
     public String getFileName() {
         return this.fileName;
+    }
+
+    public String getMediaType() {
+        return this.mediaType;
     }
 }

@@ -11,11 +11,14 @@ public class Media {
 
     public Media() {};
 
-    public Media (String name, String description, ArrayList<String> creators, int duration, String captionFile) {
+    public Media (String name, String description, String creators, String duration, String captionFile) {
         this.name = name;
         this.description = description;
-        this.creators = new ArrayList<>(creators);
-        this.duration = duration;
+        this.creators = new ArrayList<>();
+        String[] creatorList = creators.split("#");
+        for (String creator : creatorList)
+            this.creators.add(creator);
+        this.duration = Integer.parseInt(duration);
         this.captionFile = captionFile;
     }
 }

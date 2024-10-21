@@ -7,8 +7,8 @@ public class Song extends Media {
 
     public Song() {};
 
-    public Song (String name, String description, ArrayList<String> creators, String genre, int duration, String captionFile) {
-        super(name, description, creators, duration, captionFile);
-        this.genre = genre;
+    public Song (String[] args) {
+        super(args[0], args[1], args[2], args[4], args[5]);
+        this.genre = args[3];
     }
 }
