@@ -1,4 +1,4 @@
-package exception;
+package error;
 
 public class InvalidLineException extends Exception { 
     public InvalidLineException(String errorMessage) {

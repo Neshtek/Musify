@@ -1,4 +1,4 @@
-package util;
+package extra;
 
 import java.util.Scanner;
 
@@ -16,5 +16,6 @@ public class Constants {
     public static final String SHORTCLIP_DATA_FORMATTER = "|%2d|%30s|%30s|%30s|%16d|%n";
    
    /* add more constants here */
+
 }
 
