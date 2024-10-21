@@ -25,26 +25,10 @@ public class MusifyApp {
             app.playlistListFile = args[1];
             app.handleFiles();
         }
-        
-        app.displayWelcomeMessage(args);
-        app.runMainMenu(args);
+        app.displayWelcomeMessage();
+        app.runMainMenu();
     }
-/*
-if (objectType.equals("Song")) {
-    if (fileDetails.length != 6)
-        throw new InvalidLineException("Song details incomplete. Skipping this line.");
-    if (!Arrays.asList(this.genres).contains(fileDetails[3]))
-        throw new InvalidFormatException("Incorrect Genre for Song. Skipping this line.");
-} else if (objectType.equals("Podcast")) {
-    if (fileDetails.length != 8)
-        throw new InvalidLineException("Podcast details incomplete. Skipping this line.");
-    if (!Arrays.asList(this.categories).contains(fileDetails[3]))
-        throw new InvalidFormatException("Incorrect Category for Podcast. Skipping this line.");
-} else {
-    if (fileDetails.length != 5)
-        throw new InvalidLineException("ShortClip details incomplete. Skipping this line.");
-}
-*/
+
     private void storePlaylists (Scanner fileReader) {
         String[] fileDetails;
         while (fileReader.hasNextLine()) {
@@ -63,24 +47,70 @@ if (objectType.equals("Song")) {
         }       
     }
 
-    private void storeMedia (Scanner fileReader, String mediaType) {
+    private void storeMedia (Scanner fileReader, Playlist playlist) {
         String[] fileDetails;
+        String captionFile = null;
+        boolean flag;
         while (fileReader.hasNextLine()) {
             try {
                 fileDetails = fileReader.nextLine().split(",");
-                if (mediaType.equals("Song")) {
+                if (playlist.getMediaType().equals("SONG")) {
                     if (fileDetails.length != 6)
                         throw new InvalidLineException("Song details incomplete. Skipping this line.");
                     if (!Arrays.asList(this.genres).contains(fileDetails[3]))
                         throw new InvalidFormatException("Incorrect Genre for Song. Skipping this line.");
-                } else if (mediaType.equals("Podcast")) {
-                    
+                    flag = checkFormat(fileDetails[4]);
+                    if (!flag)
+                        throw new InvalidFormatException("Duration in mins not in correct format. Skipping this line.");
+                    captionFile = fileDetails[5];
+                    playlist.addSongs(new Song(fileDetails));                    
+                } else if (playlist.getMediaType().equals("PODCAST")) {
+                    if (fileDetails.length != 8)
+                        throw new InvalidLineException("Podcast details incomplete. Skipping this line.");
+                    if (!Arrays.asList(this.categories).contains(fileDetails[3]))
+                        throw new InvalidFormatException("Incorrect Category for Podcast. Skipping this line.");
+                    flag = checkFormat(fileDetails[6]);
+                    if (!flag)
+                        throw new InvalidFormatException("Duration in mins not in correct format. Skipping this line.");
+                    flag = checkFormat(fileDetails[5]);
+                    if (!flag)
+                        throw new InvalidFormatException("Episode number not in correct format. Skipping this line.");
+                    captionFile = fileDetails[7];                  
+                    playlist.addPodcasts(new Podcast(fileDetails));                    
+                } else {
+                    if (fileDetails.length != 5)
+                        throw new InvalidLineException("ShortClip details incomplete. Skipping this line.");
+                    flag = checkFormat(fileDetails[3]);
+                    if (!flag)
+                        throw new InvalidFormatException("Duration in mins not in correct format. Skipping this line.");
+                    captionFile = fileDetails[4]; 
+                    playlist.addShortClips(new ShortClip(fileDetails));                    
                 }
             } catch (InvalidLineException e) {
                 System.err.println(e.getMessage());
             } catch (InvalidFormatException e) {
                 System.err.println(e.getMessage());
             }
+            Media.checkCaptionExists(captionFile);
+        }
+    }
+
+    private boolean checkFormat (String stringToCheck) {
+        try {
+            int value = Integer.parseInt(stringToCheck);
+            if (value <= 0)
+                return false;
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private void displayPlaylists() {
+        System.out.println("Here are your playlists-");
+        System.out.printf(Constants.PLAYLIST_HEADER_FORMATTER, "#", "Type", "Playlist Name");
+        for (int i = 0; i < this.playlists.size(); i++) {
+            System.out.printf(Constants.PLAYLIST_FORMATTER, i, this.playlists.get(i).getMediaType(), this.playlists.get(i).getName());
         }
     }
 
@@ -92,21 +122,36 @@ if (objectType.equals("Song")) {
             fileReader.close();
 
             for (Playlist playlist : this.playlists) {
-                fileReader = new Scanner(new FileInputStream("data/playlist/" + playlist.getFileName()));
-                if (playlist.getMediaType() == "SONG") {
-                    for (String[] mediaDetails : this.storeMedia(fileReader, "Song")) {
-                        playlist.addMedia(new Song(mediaDetails));
-                    }
+                try {
+                    fileReader = new Scanner(new FileInputStream("data/playlist/" + playlist.getFileName()));
+                    this.storeMedia(fileReader, playlist);
+                    fileReader.close();
+                } catch (IOException e) {
+                    System.err.println("Invalid or missing file.");
                 }
             }
         } catch (IOException e) {
-            System.err.println(e.getMessage());
-            // System.err.println("Invalid or missing file.");
+            System.err.println("Invalid or missing file.");
         }
     }
 
-    private void runMainMenu (String[] args) {
-        
+    private void runMainMenu() {
+        String menuChoice;
+        do {
+            this.printMainMenu();
+            menuChoice = Constants.keyboard.nextLine();
+            switch (menuChoice) {
+                case "1":
+                    this.playlists.add(new Playlist());
+                    break;
+    
+                case "2":
+                    this.displayPlaylists();
+                    break;
+                default:
+                    break;
+            }
+        } while (!menuChoice.equals("7"));
     }
 
     private void printMainMenu() {
@@ -120,8 +165,12 @@ if (objectType.equals("Song")) {
         System.out.println("7. Exit Musify.");
     }
 
-    private void displayWelcomeMessage (String[] args) {
-        
+    private void displayWelcomeMessage() {
+        if (this.playlistListFile == null)
+            System.out.println("No Playlist data found to load.");
+        else
+            System.out.println("Data loading complete.");
+        System.out.printf("Welcome %s. Choose your music, podcasts or watch short clips.Please select one of the options.\n", this.userName);
     }
 }
 
