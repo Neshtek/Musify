@@ -51,4 +51,25 @@ public class Media {
     protected void setCreator(String creator) {
         this.creators.add(creator);
     }
+
+    protected String getName() {
+        return this.name;
+    }
+
+    protected String getCreators() {
+        String creators = this.creators.get(0);
+        if (this.creators.size() > 1)
+            for (int i = 1; i < this.creators.size(); i++) {
+                creators += "," + this.creators.get(i);
+            }
+        return creators;
+    }
+
+    protected String getDescription() {
+        return this.description;
+    }
+    
+    protected int getDuration() {
+        return this.duration;
+    }
 }

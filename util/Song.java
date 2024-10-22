@@ -23,4 +23,8 @@ public class Song extends Media {
         super(args[0], args[1], args[2], args[4], args[5]);
         this.genre = args[3];
     }
+
+    public void displayDetails(int index) {
+        System.out.printf(Constants.SONG_PLAYLIST_DATA_FORMATTER, (index + 1), super.getName(), super.getCreators(), super.getDescription(), this.genre, super.getDuration());
+    }
 }

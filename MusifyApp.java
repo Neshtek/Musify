@@ -50,6 +50,7 @@ public class MusifyApp {
     private void storeMedia (Scanner fileReader, Playlist playlist) {
         String[] fileDetails;
         String captionFile = null;
+        String duration = null;
         boolean flag;
         while (fileReader.hasNextLine()) {
             try {
@@ -110,7 +111,7 @@ public class MusifyApp {
         System.out.println("Here are your playlists-");
         System.out.printf(Constants.PLAYLIST_HEADER_FORMATTER, "#", "Type", "Playlist Name");
         for (int i = 0; i < this.playlists.size(); i++) {
-            System.out.printf(Constants.PLAYLIST_FORMATTER, i, this.playlists.get(i).getMediaType(), this.playlists.get(i).getName());
+            System.out.printf(Constants.PLAYLIST_FORMATTER, (i + 1), this.playlists.get(i).getMediaType(), this.playlists.get(i).getName());
         }
     }
 
@@ -137,6 +138,7 @@ public class MusifyApp {
 
     private void runMainMenu() {
         String menuChoice;
+        String playlistName;
         do {
             this.printMainMenu();
             menuChoice = Constants.keyboard.nextLine();
@@ -148,8 +150,31 @@ public class MusifyApp {
                 case "2":
                     this.displayPlaylists();
                     break;
-                default:
+
+                case "3":
+                    System.out.print("Enter Playlist Name: ");
+                    playlistName = Constants.keyboard.nextLine();
+                    for (Playlist playlist : this.playlists) {
+                        if (playlist.matchName(playlistName)) {
+                            playlist.displayMedia();
+                        }
+                    }
                     break;
+
+                case "4":
+                    System.out.print("Enter Playlist Name: ");
+                    playlistName = Constants.keyboard.nextLine();
+                    for (Playlist playlist : this.playlists) {
+                        if (playlist.matchName(playlistName)) {
+                            this.playlists.remove(playlist);
+                        }
+                    }
+                    break;
+
+                case "6":
+                    
+                    break;
+
             }
         } while (!menuChoice.equals("7"));
     }

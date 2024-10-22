@@ -85,4 +85,45 @@ public class Playlist {
     public String getName() {
         return this.name;
     }
+
+    public void displayMedia() {
+        boolean mediaExists = true;
+        switch (this.mediaType) {
+            case "SONG":
+                if (this.songs.size() != 0) {
+                    System.out.printf(Constants.SONG_PLAYLIST_HEADER, "Id", "Title", "Artist Name", "Description", "Genre", "Duration In Mins");
+                    for (int i = 0; i < this.songs.size(); i++)
+                        this.songs.get(i).displayDetails(i);
+                } else
+                    mediaExists = false;
+                break;
+            
+            case "PODCAST":
+                if (this.podcasts.size() != 0) {
+                    System.out.printf(Constants.PODCAST_PLAYLIST_HEADER, "Id", "Title", "Host Name(s)", "Description", "Category", "Series Name", "Episode#", "Duration In Mins");
+                    for (int i = 0; i < this.podcasts.size(); i++)
+                        this.podcasts.get(i).displayDetails(i);
+                } else
+                    mediaExists = false;
+                break;
+
+            case "SHORTCLIP":
+                if (this.shortClips.size() != 0) {
+                    System.out.printf(Constants.SHORTCLIP_PLAYLIST_HEADER, "Id", "Title", "Artist Name", "Description", "Duration In Mins");
+                    for (int i = 0; i < this.shortClips.size(); i++)
+                        this.shortClips.get(i).displayDetails(i);
+                } else
+                    mediaExists = false;
+                break;
+        }
+        if (!mediaExists)
+            System.out.printf("No %s in the playlist to view.\n", this.mediaType.toLowerCase());
+    }
+
+    public boolean matchName (String name) {
+        if (this.name.toLowerCase().equals(name.toLowerCase()))
+            return true;
+        else
+            return false;
+    }
 }

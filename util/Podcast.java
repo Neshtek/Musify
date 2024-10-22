@@ -33,4 +33,8 @@ public class Podcast extends Media {
         this.seriesName = args[4];
         this.episodeNo = Integer.parseInt(args[5]);
     }
+
+    public void displayDetails(int index) {
+        System.out.printf(Constants.PODCAST_DATA_FORMATTER, (index + 1), super.getName(), super.getCreators(), super.getDescription(), this.category, this.seriesName, this.episodeNo, super.getDuration());
+    }
 }
