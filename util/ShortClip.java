@@ -3,7 +3,7 @@ package util;
 import error.MediaNotFoundException;
 import extra.*;
 
-public class ShortClip extends Media {
+public class ShortClip extends Media implements MediaType {
     public ShortClip() {
         super();
         System.out.print("Enter the artist Name: ");

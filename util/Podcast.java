@@ -3,7 +3,7 @@ package util;
 import error.MediaNotFoundException;
 import extra.*;
 
-public class Podcast extends Media {
+public class Podcast extends Media implements MediaType {
     private String category;
     private String seriesName;
     private int episodeNo;

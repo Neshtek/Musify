@@ -3,7 +3,7 @@ package util;
 import error.MediaNotFoundException;
 import extra.*;
 
-public class Song extends Media {
+public class Song extends Media implements MediaType {
     private String genre;
 
     public Song() {

@@ -90,6 +90,39 @@ public class Playlist {
         }
     }
 
+    private void removeMedia() throws MediaNotFoundException {
+        if (this.songs.isEmpty() && this.podcasts.isEmpty() && this.shortClips.isEmpty())
+            throw new MediaNotFoundException("You can not remove media from an empty list.");
+        System.out.printf("Enter the %s to remove: ", this.mediaType.toLowerCase());
+        String mediaName = Constants.keyboard.nextLine();
+        switch (this.mediaType) {
+            case "SONG":
+                for (Song song : this.songs)
+                    if (song.getName().equalsIgnoreCase(mediaName)) {
+                        this.songs.remove(song);
+                        System.out.println("Media removed successfully.");
+                        break;
+                    }
+                break;
+            case "PODCAST":
+                for (Podcast podcast : this.podcasts)
+                    if (podcast.getName().equalsIgnoreCase(mediaName)) {
+                        this.podcasts.remove(podcast);
+                        System.out.println("Media removed successfully.");
+                        break;
+                    }
+                break;
+            case "SHORTCLIP":
+                for (ShortClip shortClip : this.shortClips)
+                    if (shortClip.getName().equalsIgnoreCase(mediaName)) {
+                        this.shortClips.remove(shortClip);
+                        System.out.println("Media removed successfully.");
+                        break;
+                    }
+                break;
+        }
+    }
+
     public String getFileName() {
         return this.fileName;
     }
@@ -210,59 +243,30 @@ public class Playlist {
         do {
             this.printModifyMenu();
             modyifyChoice = Constants.keyboard.nextLine();
-            try {
-                switch (modyifyChoice) {
-                    case "1":
-                        try {
-                            this.displayMedia();
-                        } catch (MediaNotFoundException e) {
-                            System.err.println(e.getMessage());
-                        }
-                        break;
-        
-                    case "2":
-                        try {
-                            this.addMedia();
-                        } catch (PlayListFullException e) {
-                            System.err.println(e.getMessage());
-                        }
-                        break;
-                    
-                    case "3":
-                        if (this.songs.isEmpty() && this.podcasts.isEmpty() && this.shortClips.isEmpty())
-                            throw new MediaNotFoundException("You can not remove media from an empty list.");
-                        System.out.printf("Enter the %s to remove: ", this.mediaType.toLowerCase());
-                        String mediaName = Constants.keyboard.nextLine();
-                            switch (this.mediaType) {
-                                case "SONG":
-                                    for (Song song : this.songs)
-                                        if (song.getName().equalsIgnoreCase(mediaName)) {
-                                            this.songs.remove(song);
-                                            System.out.println("Media removed successfully.");
-                                            break;
-                                        }
-                                    break;
-                                case "PODCAST":
-                                    for (Podcast podcast : this.podcasts)
-                                        if (podcast.getName().equalsIgnoreCase(mediaName)) {
-                                            this.podcasts.remove(podcast);
-                                            System.out.println("Media removed successfully.");
-                                            break;
-                                        }
-                                    break;
-                                case "SHORTCLIP":
-                                    for (ShortClip shortClip : this.shortClips)
-                                        if (shortClip.getName().equalsIgnoreCase(mediaName)) {
-                                            this.shortClips.remove(shortClip);
-                                            System.out.println("Media removed successfully.");
-                                            break;
-                                        }
-                                    break;
-                            }
-                            break;
-                        }
-            } catch (MediaNotFoundException e) {
-                System.err.println(e.getMessage());
+            switch (modyifyChoice) {
+                case "1":
+                    try {
+                        this.displayMedia();
+                    } catch (MediaNotFoundException e) {
+                        System.err.println(e.getMessage());
+                    }
+                    break;
+    
+                case "2":
+                    try {
+                        this.addMedia();
+                    } catch (PlayListFullException e) {
+                        System.err.println(e.getMessage());
+                    }
+                    break;
+                
+                case "3":
+                    try {
+                        this.removeMedia();
+                    } catch (MediaNotFoundException e) {
+                        System.err.println(e.getMessage());
+                    }
+                    break;
             }
         } while (!modyifyChoice.equals("4"));
     }
