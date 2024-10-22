@@ -17,9 +17,9 @@ public class Podcast extends Media {
         do {
             System.out.print("Enter the host Name or Q to stop entering the host name: ");
             input = Constants.keyboard.nextLine();
-            if (!input.equals("Q"))
-            super.setCreator(input);
-        } while (!input.equals("Q"));
+            if (!input.toUpperCase().equals("Q"))
+                super.setCreator(input);
+        } while (!input.toUpperCase().equals("Q"));
         System.out.print("Enter the series Name: ");
         input = Constants.keyboard.nextLine();
         this.seriesName = input;

@@ -1,5 +1,5 @@
 import util.*;
-import extra.*;
+import extra.Constants;
 import error.*;
 import java.util.*;
 import java.io.*;
@@ -12,7 +12,7 @@ public class MusifyApp {
     private String userName;
     private String playlistListFile;
 
-    private ArrayList<Playlist> playlists;
+    private ArrayList<Playlist> playlists = new ArrayList<>();
 
     public static void main (String[] args)  {
         MusifyApp app = new MusifyApp();
@@ -23,71 +23,104 @@ public class MusifyApp {
         } else {
             app.userName = args[0];
             app.playlistListFile = args[1];
-            app.handleFiles();
+            try {
+                app.handleFiles();
+            } catch (IOException e) {
+                System.err.println("Invalid or missing file.");
+            }
         }
         app.displayWelcomeMessage();
-        app.runMainMenu();
-    }
 
-    private void storePlaylists (Scanner fileReader) {
-        String[] fileDetails;
-        while (fileReader.hasNextLine()) {
+        String menuChoice = "";
+        do {
             try {
-                fileDetails = fileReader.nextLine().split(",");
-                if (fileDetails.length != 3)
-                    throw new InvalidLineException("Invalid Playlist data. Skipping this line.");
-                if (!Arrays.asList(this.mediaTypes).contains(fileDetails[1]))
-                    throw new InvalidFormatException("Incorrect Media Type. Skipping this line.");
-                this.playlists.add(new Playlist(fileDetails));
-            } catch (InvalidLineException e) {
-                System.err.println(e.getMessage());
-            } catch (InvalidFormatException e) {
+                menuChoice = app.runMainMenu(menuChoice);
+            } catch (EmptyException | MediaNotFoundException | InvalidInputException e) {
                 System.err.println(e.getMessage());
             }
-        }       
+        } while (!menuChoice.equals("7"));
+
+        try {
+            app.writeFiles();
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+        System.out.printf("Exiting Musify. Goodbye, %s.", app.userName);
     }
 
-    private void storeMedia (Scanner fileReader, Playlist playlist) {
-        String[] fileDetails;
-        boolean flag;
+    private void handleFiles() throws IOException {
+        Scanner fileReader = new Scanner(new FileInputStream("data/" + this.playlistListFile));
         while (fileReader.hasNextLine()) {
             try {
-                fileDetails = fileReader.nextLine().split(",");
-                if (playlist.getMediaType().equals("SONG")) {
-                    if (fileDetails.length != 6)
-                        throw new InvalidLineException("Song details incomplete. Skipping this line.");
-                    if (!Arrays.asList(this.genres).contains(fileDetails[3]))
-                        throw new InvalidFormatException("Incorrect Genre for Song. Skipping this line.");
-                    flag = checkFormat(fileDetails[4]);
-                    if (!flag)
-                        throw new InvalidFormatException("Duration in mins not in correct format. Skipping this line.");
-                    playlist.addSongs(new Song(fileDetails));                    
-                } else if (playlist.getMediaType().equals("PODCAST")) {
-                    if (fileDetails.length != 8)
-                        throw new InvalidLineException("Podcast details incomplete. Skipping this line.");
-                    if (!Arrays.asList(this.categories).contains(fileDetails[3]))
-                        throw new InvalidFormatException("Incorrect Category for Podcast. Skipping this line.");
-                    flag = checkFormat(fileDetails[6]);
-                    if (!flag)
-                        throw new InvalidFormatException("Duration in mins not in correct format. Skipping this line.");
-                    flag = checkFormat(fileDetails[5]);
-                    if (!flag)
-                        throw new InvalidFormatException("Episode number not in correct format. Skipping this line.");
-                    playlist.addPodcasts(new Podcast(fileDetails));                    
-                } else {
-                    if (fileDetails.length != 5)
-                        throw new InvalidLineException("ShortClip details incomplete. Skipping this line.");
-                    flag = checkFormat(fileDetails[3]);
-                    if (!flag)
-                        throw new InvalidFormatException("Duration in mins not in correct format. Skipping this line.");
-                    playlist.addShortClips(new ShortClip(fileDetails));                    
-                }
-            } catch (InvalidLineException e) {
-                System.err.println(e.getMessage());
-            } catch (InvalidFormatException e) {
+                fileReader = this.storePlaylists(fileReader);
+            } catch (InvalidFormatException | InvalidLineException e) {
                 System.err.println(e.getMessage());
             }
         }
+        fileReader.close();
+
+        for (Playlist playlist : this.playlists) {
+            try {
+                fileReader = new Scanner(new FileInputStream("data/playlist/" + playlist.getFileName()));
+                while (fileReader.hasNextLine()) {
+                    try {
+                        fileReader = this.storeMedia(fileReader, playlist);
+                    } catch (InvalidLineException | InvalidFormatException | PlayListFullException e) {
+                        System.err.println(e.getMessage());
+                    }
+                }
+                fileReader.close();
+            } catch (IOException e) {
+                System.err.println("Invalid or missing file.");
+            }
+        }
+    }
+
+    private Scanner storePlaylists (Scanner fileReader) throws InvalidFormatException, InvalidLineException {
+        String[] fileDetails;
+        fileDetails = fileReader.nextLine().split(",");
+        if (fileDetails.length != 3)
+            throw new InvalidLineException("Invalid Playlist data. Skipping this line.");
+        if (!Arrays.asList(this.mediaTypes).contains(fileDetails[1]))
+            throw new InvalidFormatException("Incorrect Media Type. Skipping this line.");
+        this.playlists.add(new Playlist(fileDetails));
+        return fileReader;
+    }
+
+    private Scanner storeMedia (Scanner fileReader, Playlist playlist) throws InvalidFormatException, InvalidLineException, PlayListFullException {
+        String[] fileDetails;
+        boolean flag = true, episodeFlag = true;
+        fileDetails = fileReader.nextLine().split(",");
+        switch (playlist.getMediaType()) {
+            case "SONG":
+                if (fileDetails.length != 6)
+                    throw new InvalidLineException("Song details incomplete. Skipping this line.");
+                if (!Arrays.asList(this.genres).contains(fileDetails[3]))
+                    throw new InvalidFormatException("Incorrect Genre for Song. Skipping this line.");
+                flag = checkFormat(fileDetails[4]);
+                break;
+            
+            case "PODCAST":
+                if (fileDetails.length != 8)
+                    throw new InvalidLineException("Podcast details incomplete. Skipping this line.");
+                if (!Arrays.asList(this.categories).contains(fileDetails[3]))
+                    throw new InvalidFormatException("Incorrect Category for Podcast. Skipping this line.");
+                flag = checkFormat(fileDetails[6]);
+                episodeFlag = checkFormat(fileDetails[5]);
+                break;
+            
+            case "SHORTCLIP":
+                if (fileDetails.length != 5)
+                    throw new InvalidLineException("ShortClip details incomplete. Skipping this line.");
+                flag = checkFormat(fileDetails[3]);
+                break;
+        }
+        if (!episodeFlag)
+            throw new InvalidFormatException("Episode number not in correct format. Skipping this line.");
+        if (!flag)
+            throw new InvalidFormatException("Duration in mins not in correct format. Skipping this line.");
+        playlist.addMedia(fileDetails);
+        return fileReader;
     }
 
     private boolean checkFormat (String stringToCheck) {
@@ -101,7 +134,22 @@ public class MusifyApp {
         }
     }
 
-    private void displayPlaylists() {
+    private Playlist matchPlaylistName() throws EmptyException, MediaNotFoundException {
+        if (this.playlists.isEmpty())
+            throw new EmptyException("No playlists found.");
+        System.out.print("Enter Playlist Name: ");
+        String playlistName = Constants.keyboard.nextLine();
+        for (Playlist playlist : this.playlists) {
+            if (playlist.matchName(playlistName)) {
+                return playlist;
+            }
+        }
+        throw new MediaNotFoundException("No such playlist found with name: " + playlistName);
+    }
+
+    private void displayPlaylists() throws EmptyException {
+        if (this.playlists.isEmpty())
+            throw new EmptyException("No playlists found.");
         System.out.println("Here are your playlists-");
         System.out.printf(Constants.PLAYLIST_HEADER_FORMATTER, "#", "Type", "Playlist Name");
         System.out.println("-".repeat(47));
@@ -110,89 +158,46 @@ public class MusifyApp {
         }
     }
 
-    private void handleFiles() {
-        Scanner fileReader;
-        try {
-            fileReader = new Scanner(new FileInputStream("data/" + this.playlistListFile));
-            this.storePlaylists(fileReader);
-            fileReader.close();
+    private String runMainMenu(String menuChoice) throws EmptyException, MediaNotFoundException, InvalidInputException {
+        Playlist playlist = null;
+        this.printMainMenu();
+        menuChoice = Constants.keyboard.nextLine();
+        switch (menuChoice) {
+            case "1":
+                this.playlists.add(new Playlist());
+                break;
 
-            for (Playlist playlist : this.playlists) {
-                try {
-                    fileReader = new Scanner(new FileInputStream("data/playlist/" + playlist.getFileName()));
-                    this.storeMedia(fileReader, playlist);
-                    fileReader.close();
-                } catch (IOException e) {
-                    System.err.println("Invalid or missing file.");
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Invalid or missing file.");
+            case "2":
+                this.displayPlaylists();
+                break;
+
+            case "3":
+                playlist = this.matchPlaylistName();
+                playlist.displayMedia();
+                break;
+
+            case "4":
+                playlist = this.matchPlaylistName();
+                this.playlists.remove(playlist);
+                break;
+                
+            case "5":
+                playlist = this.matchPlaylistName();
+                playlist.runModifyMenu();
+                break;
+
+            case "6":
+                playlist = this.matchPlaylistName();
+                playlist.play();
+                break;
+            
+            case "7":
+                break;
+
+            default:
+                throw new InvalidInputException(Constants.INVALID_INPUT);
         }
-    }
-
-    private void runMainMenu() {
-        String menuChoice;
-        String playlistName;
-        do {
-            this.printMainMenu();
-            menuChoice = Constants.keyboard.nextLine();
-            switch (menuChoice) {
-                case "1":
-                    this.playlists.add(new Playlist());
-                    break;
-    
-                case "2":
-                    this.displayPlaylists();
-                    break;
-
-                case "3":
-                    System.out.print("Enter Playlist Name: ");
-                    playlistName = Constants.keyboard.nextLine();
-                    for (Playlist playlist : this.playlists) {
-                        if (playlist.matchName(playlistName)) {
-                            playlist.displayMedia();
-                        }
-                    }
-                    break;
-
-                case "4":
-                    System.out.print("Enter Playlist Name: ");
-                    playlistName = Constants.keyboard.nextLine();
-                    for (Playlist playlist : this.playlists) {
-                        if (playlist.matchName(playlistName)) {
-                            this.playlists.remove(playlist);
-                        }
-                    }
-                    break;
-                    
-                case "5":
-                    System.out.print("Enter Playlist Name: ");
-                    playlistName = Constants.keyboard.nextLine();
-                    for (Playlist playlist : this.playlists) {
-                        if (playlist.matchName(playlistName)) {
-                            playlist.runModifyMenu();
-                        }
-                    }
-                    break;
-
-                case "6":
-                    System.out.print("Enter Playlist Name: ");
-                    playlistName = Constants.keyboard.nextLine();
-                    for (Playlist playlist : this.playlists) {
-                        if (playlist.matchName(playlistName)) {
-                            playlist.play();
-                        }
-                    }
-                    break;
-            }
-        } while (!menuChoice.equals("7"));
-        try {
-            this.writeFiles();
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
-        System.out.printf("Exiting Musify. Goodbye, %s.", this.userName);
+        return menuChoice;
     }
 
     private void printMainMenu() {

@@ -15,9 +15,9 @@ public class Song extends Media {
         do {
             System.out.print("Enter the artist Name or Q to stop entering the artist name: ");
             input = Constants.keyboard.nextLine();
-            if (!input.equals("Q"))
+            if (!input.toUpperCase().equals("Q"))
                 super.setCreator(input);
-        } while (!input.equals("Q"));
+        } while (!input.toUpperCase().equals("Q"));
     }
 
     public Song (String[] args) {

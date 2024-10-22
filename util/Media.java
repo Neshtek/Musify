@@ -7,7 +7,7 @@ import java.io.*;
 public class Media {
     private String name;
     private String description;
-    private ArrayList<String> creators;
+    private ArrayList<String> creators = new ArrayList<>();
     private int duration;
     private String captionFile;
     private String captions;
@@ -26,11 +26,14 @@ public class Media {
         System.out.print("Enter the filename for the captions or lyrics: ");
         input = Constants.keyboard.nextLine();
         this.captionFile = input;
-        Scanner fileReader = Media.checkCaptionExists(input);
-        this.captions = "";
-        if (fileReader != null)
+        try {
+            Scanner fileReader = Media.checkCaptionExists(input);
+            this.captions = "";
             this.storeCaptions(fileReader);
-        fileReader.close();
+            fileReader.close();
+        } catch (IOException e) {
+            System.err.println("Invalid or missing caption file.");
+        }
     }
 
     public Media (String name, String description, String creators, String duration, String captionFile) {
@@ -42,22 +45,19 @@ public class Media {
             this.creators.add(creator);
         this.duration = Integer.parseInt(duration);
         this.captionFile = captionFile;
-        Scanner fileReader = Media.checkCaptionExists(captionFile);
-        this.captions = "";
-        if (fileReader != null)
-            this.storeCaptions(fileReader);
-        fileReader.close();
-    }
-
-    public static Scanner checkCaptionExists (String captionFile) {
         try {
-            Scanner fileReader = new Scanner(new FileInputStream("data/mediatext/" + captionFile));
+            Scanner fileReader = Media.checkCaptionExists(captionFile);
+            this.captions = "";
+            this.storeCaptions(fileReader);
             fileReader.close();
-            return fileReader;
         } catch (IOException e) {
             System.err.println("Invalid or missing caption file.");
-            return null;
         }
+    }
+
+    public static Scanner checkCaptionExists (String captionFile) throws IOException {
+        Scanner fileReader = new Scanner(new FileInputStream("data/mediatext/" + captionFile));
+        return fileReader;
     }
 
     private void storeCaptions(Scanner fileReader) {
