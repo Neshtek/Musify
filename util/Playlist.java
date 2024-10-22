@@ -5,6 +5,11 @@ import java.io.*;
 import error.*;
 import extra.*;
 
+/**
+ * This class is for all Playlist relevant data.
+ * @version ver 1.0
+ * @author Neelaksh Tayal 1627659
+ */
 public class Playlist {
     private String name;
     private String mediaType;
@@ -13,6 +18,9 @@ public class Playlist {
     private ArrayList<Podcast> podcasts = new ArrayList<>();
     private ArrayList<ShortClip> shortClips = new ArrayList<>();
 
+    /**
+     * Default Constructor. Creates a new playlist object by taking in values from the user.
+     */
     public Playlist() {
         String input;
         System.out.print("Enter Playlist Name: ");
@@ -44,12 +52,21 @@ public class Playlist {
         } while (!input.equalsIgnoreCase("Q"));
     }
 
+    /**
+     * Creates a new Playlist object based on file data.
+     * @param args file data passed as a String array.
+     */
     public Playlist (String[] args) {
         this.name = args[0];
         this.mediaType = args[1];
         this.fileName = args[2];
     }
 
+    /**
+     * Method to add media to their respective ArrayLists based on file data.
+     * @param fileDetails file data compiled as a String array.
+     * @throws PlayListFullException if playlist object already has 5 objects.
+     */
     public void addMedia (String[] fileDetails) throws PlayListFullException {
         switch (this.mediaType) {
             case "SONG":
@@ -70,6 +87,10 @@ public class Playlist {
         }
     }
 
+    /**
+     * Method to add media to their respective ArrayLists based on user input.
+     * @throws PlayListFullException if playlist object already has 5 objects.
+     */
     private void addMedia() throws PlayListFullException {
         switch (this.mediaType) {
             case "SONG":
@@ -90,6 +111,10 @@ public class Playlist {
         }
     }
 
+    /**
+     * Method to delete media from a playlist.
+     * @throws MediaNotFoundException if all media lists are empty, nothing can be deleted.
+     */
     private void removeMedia() throws MediaNotFoundException {
         if (this.songs.isEmpty() && this.podcasts.isEmpty() && this.shortClips.isEmpty())
             throw new MediaNotFoundException("You can not remove media from an empty list.");
@@ -123,18 +148,34 @@ public class Playlist {
         }
     }
 
+    /**
+     * Getter method for fileName.
+     * @return String object fileName.
+     */
     public String getFileName() {
         return this.fileName;
     }
 
+    /**
+     * Getter method for mediaType.
+     * @return String object mediaType.
+     */
     public String getMediaType() {
         return this.mediaType;
     }
 
+    /**
+     * Getter method for playlist's name.
+     * @return String object name.
+     */
     public String getName() {
         return this.name;
     }
 
+    /**
+     * Method to "play" the contents of the playlist.
+     * @throws MediaNotFoundException if the content lists are empty.
+     */
     public void play() throws MediaNotFoundException {
         boolean mediaExists = true;
         switch (this.mediaType) {
@@ -191,6 +232,10 @@ public class Playlist {
 
     }
 
+    /**
+     * Method to display media lists' content in a tabular format.
+     * @throws MediaNotFoundException if the content lists are empty.
+     */
     public void displayMedia() throws MediaNotFoundException {
         boolean mediaExists = true;
         switch (this.mediaType) {
@@ -231,6 +276,11 @@ public class Playlist {
             throw new MediaNotFoundException("No " + this.mediaType.toLowerCase() + " in the playlist to view.");
     }
 
+    /**
+     * Method to match the name of the playlist with another provided name.
+     * @param name String object containing the name that needs to be found.
+     * @return A boolean value based on if the name is found or not.
+     */
     public boolean matchName (String name) {
         if (this.name.equalsIgnoreCase(name.toLowerCase()))
             return true;
@@ -238,6 +288,9 @@ public class Playlist {
             return false;
     }
 
+    /**
+     * The facilitator method for the modify playlists sub-menu.
+     */
     public void runModifyMenu() {
         String modyifyChoice;
         do {
@@ -271,6 +324,9 @@ public class Playlist {
         } while (!modyifyChoice.equals("4"));
     }
 
+    /**
+     * The text for the modify playlists sub-menu.
+     */
     private void printModifyMenu() {
         System.out.println("Please select one of the options.");
         System.out.println("1. View the playlist.");
@@ -279,6 +335,10 @@ public class Playlist {
         System.out.println("4. Exit and go back to main menu.");
     }
 
+    /**
+     * Method to write media content objects to files.
+     * @throws IOException if file cannot be opened or written to.
+     */
     public void writeFiles() throws IOException {
         PrintWriter output = new PrintWriter(new FileOutputStream("data/playlist/" + fileName));
         if (this.mediaType.equalsIgnoreCase("SONG"))

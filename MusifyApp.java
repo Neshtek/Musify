@@ -4,16 +4,28 @@ import error.*;
 import java.util.*;
 import java.io.*;
 
+/**
+ * This class is the backbone of the entire MusifyApp and houses the main method.
+ * @version ver 1.0
+ * @author Neelaksh Tayal 1627659
+ */
 public class MusifyApp {
+    // final constant values that were known to us.
     private final String[] mediaTypes = {"SONG", "PODCAST", "SHORTCLIP"};
     private final String[] genres = {"POP", "ROCK", "JAZZ"};
     private final String[] categories = {"HEALTH", "EDUCATION", "TECHNOLOGY"};
 
+    // data extracted from the command line arguments.
     private String userName;
     private String playlistListFile;
 
+    // ArrayList to store all the playlists.
     private ArrayList<Playlist> playlists = new ArrayList<>();
 
+    /**
+     * The main method where this music app starts.
+     * @param args command line arguments as a String array.
+     */
     public static void main (String[] args)  {
         MusifyApp app = new MusifyApp();
         
@@ -48,6 +60,10 @@ public class MusifyApp {
         System.out.printf("Exiting Musify. Goodbye, %s.\n", app.userName);
     }
 
+    /**
+     * This method mainly handles the reading of files and storing of the data they contain.
+     * @throws IOException when file is not found or can't be read/written to.
+     */
     private void handleFiles() throws IOException {
         Scanner fileReader = new Scanner(new FileInputStream("data/" + this.playlistListFile));
         while (fileReader.hasNextLine()) {
@@ -76,6 +92,13 @@ public class MusifyApp {
         }
     }
 
+    /**
+     * Method to store the data about the list of playlists.
+     * @param fileReader Scanner object that has the file open.
+     * @return Scanner object back to the call point so the updated state circulates accurately.
+     * @throws InvalidFormatException when provided data format does not match expected format.
+     * @throws InvalidLineException when the file line contains insufficient/extra data points.
+     */
     private Scanner storePlaylists (Scanner fileReader) throws InvalidFormatException, InvalidLineException {
         String[] fileDetails;
         fileDetails = fileReader.nextLine().split(",");
@@ -87,6 +110,15 @@ public class MusifyApp {
         return fileReader;
     }
 
+    /**
+     * Method to store the data about the media playlists according to media type.
+     * @param fileReader Scanner object that has the file open.
+     * @param playlist The current Playlist object we are making changes in.
+     * @return Scanner object back to the call point so the updated state circulates accurately.
+     * @throws InvalidFormatException when provided data format does not match expected format.
+     * @throws InvalidLineException when the file line contains insufficient/extra data points.
+     * @throws PlayListFullException when the playlist already contains 5 elements and cant store anymore.
+     */
     private Scanner storeMedia (Scanner fileReader, Playlist playlist) throws InvalidFormatException, InvalidLineException, PlayListFullException {
         String[] fileDetails;
         boolean durationFlag = true, episodeFlag = true, genreFlag = false;
@@ -137,6 +169,11 @@ public class MusifyApp {
         return fileReader;
     }
 
+    /**
+     * Checks if the numerical entries conform to the expected formats.
+     * @param stringToCheck the string value of the numerical data extracted from the file.
+     * @return a boolean value based on the outcome of the checks.
+     */
     private boolean checkFormat (String stringToCheck) {
         try {
             int value = Integer.parseInt(stringToCheck);
@@ -148,6 +185,12 @@ public class MusifyApp {
         }
     }
 
+    /**
+     * Method to search for a playlist based on user entered name from the list of playlists.
+     * @return the found Playlist object.
+     * @throws EmptyException when the list of playlists is empty.
+     * @throws MediaNotFoundException if matching entry not found in the list.
+     */
     private Playlist matchPlaylistName() throws EmptyException, MediaNotFoundException {
         if (this.playlists.isEmpty())
             throw new EmptyException("No playlists found.");
@@ -161,6 +204,10 @@ public class MusifyApp {
         throw new MediaNotFoundException("No such playlist found with name: " + playlistName);
     }
 
+    /**
+     * Method to display all playlists for the user.
+     * @throws EmptyException if list of playlists is empty.
+     */
     private void displayPlaylists() throws EmptyException {
         if (this.playlists.isEmpty())
             throw new EmptyException("No playlists found.");
@@ -172,40 +219,49 @@ public class MusifyApp {
         }
     }
 
+    /**
+     * Method that facilitates the functioning of the main menu of the app.
+     * @param menuChoice the menu item choice made by the user.
+     * @return the menu item choice in order to keep consistency between fields.
+     * @throws EmptyException if list of playlists is empty.
+     * @throws MediaNotFoundException if the playlist entered by user is not found.
+     * @throws InvalidInputException if the wrong input was given for menu item choice.
+     */
     private String runMainMenu(String menuChoice) throws EmptyException, MediaNotFoundException, InvalidInputException {
         Playlist playlist = null;
         this.printMainMenu();
         menuChoice = Constants.keyboard.nextLine();
         switch (menuChoice) {
+            // create a new playlist
             case "1":
                 this.playlists.add(new Playlist());
                 break;
-
+            // display all playlists
             case "2":
                 this.displayPlaylists();
                 break;
-
+            // display contents of a specific playlist
             case "3":
                 playlist = this.matchPlaylistName();
                 playlist.displayMedia();
                 break;
-
+            // delete a playlist
             case "4":
                 playlist = this.matchPlaylistName();
                 this.playlists.remove(playlist);
                 System.out.println("Playlist removed successfully.");
                 break;
-                
+            // modify a playlist
             case "5":
                 playlist = this.matchPlaylistName();
                 playlist.runModifyMenu();
                 break;
-
+            // play the contents of a playlist
             case "6":
                 playlist = this.matchPlaylistName();
                 playlist.play();
                 break;
-            
+            // exit
             case "7":
                 break;
 
@@ -215,6 +271,9 @@ public class MusifyApp {
         return menuChoice;
     }
 
+    /**
+     * Method that contains the main menu text.
+     */
     private void printMainMenu() {
         System.out.println("Please select one of the options.");
         System.out.println("1. Create a new playlist.");
@@ -226,6 +285,9 @@ public class MusifyApp {
         System.out.println("7. Exit Musify.");
     }
 
+    /**
+     * Method to display the welcome message for the user.
+     */
     private void displayWelcomeMessage() {
         if (this.playlistListFile == null)
             System.out.println("No Playlist data found to load.");
@@ -234,6 +296,10 @@ public class MusifyApp {
         System.out.printf("Welcome %s. Choose your music, podcasts or watch short clips.", this.userName);
     }
 
+    /**
+     * Method to write the final data into files.
+     * @throws IOException if file path specified cant be opened or written to.
+     */
     private void writeFiles() throws IOException {
         PrintWriter output;
         if (this.playlistListFile == null)
