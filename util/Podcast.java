@@ -17,9 +17,9 @@ public class Podcast extends Media {
         do {
             System.out.print("Enter the host Name or Q to stop entering the host name: ");
             input = Constants.keyboard.nextLine();
-            if (!input.toUpperCase().equals("Q"))
+            if (!input.equalsIgnoreCase("Q"))
                 super.setCreator(input);
-        } while (!input.toUpperCase().equals("Q"));
+        } while (!input.equalsIgnoreCase("Q"));
         System.out.print("Enter the series Name: ");
         input = Constants.keyboard.nextLine();
         this.seriesName = input;
@@ -36,12 +36,12 @@ public class Podcast extends Media {
     }
 
     public void displayDetails(int index) {
-        System.out.printf(Constants.PODCAST_DATA_FORMATTER, (index + 1), super.getName(), super.getCreators(), super.getDescription(), this.category, this.seriesName, this.episodeNo, super.getDuration());
+        System.out.printf(Constants.PODCAST_DATA_FORMATTER, (index + 1), super.getName(), super.getCreators(), super.getDescription(), this.category.toUpperCase(), this.seriesName, this.episodeNo, super.getDuration());
     }
 
     public void play() throws MediaNotFoundException {
-        System.out.printf("Playing Podcast: %s by %s for %d mins. This podcast is about %s.", super.getName(), super.getCreators(), super.getDuration(), super.getDescription());
-        if (super.getCaptions().equals(""))
+        System.out.printf("Playing Podcast: %s by %s for %d mins. This podcast is about %s\n", super.getName(), super.getCreators(), super.getDuration(), super.getDescription());
+        if (super.getCaptions().equalsIgnoreCase(""))
             throw new MediaNotFoundException("Cannot show captions for podcast. Media not found.");
         else {
             System.out.println("Here are the contents of the podcast.");

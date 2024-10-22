@@ -45,7 +45,7 @@ public class MusifyApp {
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
-        System.out.printf("Exiting Musify. Goodbye, %s.", app.userName);
+        System.out.printf("Exiting Musify. Goodbye, %s.\n", app.userName);
     }
 
     private void handleFiles() throws IOException {
@@ -89,35 +89,49 @@ public class MusifyApp {
 
     private Scanner storeMedia (Scanner fileReader, Playlist playlist) throws InvalidFormatException, InvalidLineException, PlayListFullException {
         String[] fileDetails;
-        boolean flag = true, episodeFlag = true;
+        boolean durationFlag = true, episodeFlag = true, genreFlag = false;
         fileDetails = fileReader.nextLine().split(",");
         switch (playlist.getMediaType()) {
             case "SONG":
                 if (fileDetails.length != 6)
                     throw new InvalidLineException("Song details incomplete. Skipping this line.");
-                if (!Arrays.asList(this.genres).contains(fileDetails[3]))
+                genreFlag = false;
+                for (String genre : this.genres) {
+                    if (genre.equalsIgnoreCase(fileDetails[3])) {
+                        genreFlag = true;
+                        break;
+                    }
+                }
+                if (!genreFlag)
                     throw new InvalidFormatException("Incorrect Genre for Song. Skipping this line.");
-                flag = checkFormat(fileDetails[4]);
+                durationFlag = checkFormat(fileDetails[4]);
                 break;
             
             case "PODCAST":
                 if (fileDetails.length != 8)
                     throw new InvalidLineException("Podcast details incomplete. Skipping this line.");
-                if (!Arrays.asList(this.categories).contains(fileDetails[3]))
+                genreFlag = false;
+                for (String category : this.categories) {
+                    if (category.equalsIgnoreCase(fileDetails[3])) {
+                        genreFlag = true;
+                        break;
+                    }
+                }
+                if (!genreFlag)
                     throw new InvalidFormatException("Incorrect Category for Podcast. Skipping this line.");
-                flag = checkFormat(fileDetails[6]);
+                durationFlag = checkFormat(fileDetails[6]);
                 episodeFlag = checkFormat(fileDetails[5]);
                 break;
             
             case "SHORTCLIP":
                 if (fileDetails.length != 5)
                     throw new InvalidLineException("ShortClip details incomplete. Skipping this line.");
-                flag = checkFormat(fileDetails[3]);
+                durationFlag = checkFormat(fileDetails[3]);
                 break;
         }
         if (!episodeFlag)
             throw new InvalidFormatException("Episode number not in correct format. Skipping this line.");
-        if (!flag)
+        if (!durationFlag)
             throw new InvalidFormatException("Duration in mins not in correct format. Skipping this line.");
         playlist.addMedia(fileDetails);
         return fileReader;
@@ -152,7 +166,7 @@ public class MusifyApp {
             throw new EmptyException("No playlists found.");
         System.out.println("Here are your playlists-");
         System.out.printf(Constants.PLAYLIST_HEADER_FORMATTER, "#", "Type", "Playlist Name");
-        System.out.println("-".repeat(47));
+        System.out.println("-".repeat(46));
         for (int i = 0; i < this.playlists.size(); i++) {
             System.out.printf(Constants.PLAYLIST_FORMATTER, (i + 1), this.playlists.get(i).getMediaType(), this.playlists.get(i).getName());
         }
@@ -179,6 +193,7 @@ public class MusifyApp {
             case "4":
                 playlist = this.matchPlaylistName();
                 this.playlists.remove(playlist);
+                System.out.println("Playlist removed successfully.");
                 break;
                 
             case "5":
@@ -216,7 +231,7 @@ public class MusifyApp {
             System.out.println("No Playlist data found to load.");
         else
             System.out.println("Data loading complete.");
-        System.out.printf("Welcome %s. Choose your music, podcasts or watch short clips.Please select one of the options.\n", this.userName);
+        System.out.printf("Welcome %s. Choose your music, podcasts or watch short clips.", this.userName);
     }
 
     private void writeFiles() throws IOException {
@@ -225,11 +240,13 @@ public class MusifyApp {
             output = new PrintWriter(new FileOutputStream("data/playlists.txt"));
         else
             output = new PrintWriter(new FileOutputStream("data/" + playlistListFile));    
-        for (Playlist playlist : this.playlists) {
-            output.println(playlist);
-            playlist.writeFiles();
+        if (!this.playlists.isEmpty()) {
+            for (Playlist playlist : this.playlists) {
+                output.println(playlist);
+                playlist.writeFiles();
+            }
+            System.out.println("Playlist data saved.");
         }
         output.close();
-        System.out.println("Playlist data saved.");
     }
 }

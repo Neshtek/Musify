@@ -24,18 +24,24 @@ public class Playlist {
         System.out.print("Enter a filename to save the playlist: ");
         input = Constants.keyboard.nextLine();
         this.fileName = input;
-        System.out.printf("Add some %s to your Playlist.\n", this.mediaType);
+        System.out.printf("Add some %s to your Playlist.\n", this.mediaType.toUpperCase());
         do {
-            System.out.printf("Enter A to add a %s to the playlist or Q to quit adding: ", this.mediaType);
-            input = Constants.keyboard.nextLine();
-            if (input.toUpperCase().equals("A")) {
-                try {
-                    this.addMedia();
-                } catch (PlayListFullException e) {
-                    System.err.printf(e.getMessage(), this.name, this.mediaType.toLowerCase());
+            try {
+                System.out.printf("Enter A to add a %s to the playlist or Q to quit adding: ", this.mediaType.toUpperCase());
+                input = Constants.keyboard.nextLine();
+                if (input.equalsIgnoreCase("A")) {
+                    try {
+                        this.addMedia();
+                    } catch (PlayListFullException e) {
+                        System.err.printf(e.getMessage(), this.name, this.mediaType.toLowerCase());
+                    }
+                } else if (!input.equalsIgnoreCase("Q")) {
+                    throw new InvalidInputException(Constants.INVALID_INPUT);
                 }
+            } catch (InvalidInputException e) {
+                System.err.println(e.getMessage());
             }
-        } while (!input.toUpperCase().equals("Q"));
+        } while (!input.equalsIgnoreCase("Q"));
     }
 
     public Playlist (String[] args) {
@@ -84,18 +90,6 @@ public class Playlist {
         }
     }
 
-    public void addSong (Song songObject) {
-        this.songs.add(songObject);
-    }
-
-    public void addPodcast (Podcast podcastObject) {
-        this.podcasts.add(podcastObject);
-    }
-
-    public void addShortClip (ShortClip shortClipObject) {
-        this.shortClips.add(shortClipObject);
-    }
-
     public String getFileName() {
         return this.fileName;
     }
@@ -108,97 +102,104 @@ public class Playlist {
         return this.name;
     }
 
-    public void play() {
+    public void play() throws MediaNotFoundException {
         boolean mediaExists = true;
         switch (this.mediaType) {
             case "SONG":
-                if (this.songs.size() != 0) {
-                    for (Song song : this.songs) {
-                        System.out.println("-".repeat(85));
-                        try {
-                            song.play();
-                        } catch (MediaNotFoundException e) {
-                            System.err.println(e.getMessage());
-                        }
-                        System.out.println("-".repeat(85));
-                    }        
-                } else
+                if (this.songs.isEmpty()) {
                     mediaExists = false;
+                    break;
+                }
+                for (Song song : this.songs) {
+                    System.out.println("-".repeat(83));
+                    try {
+                        song.play();
+                    } catch (MediaNotFoundException e) {
+                        System.err.println(e.getMessage());
+                    }
+                    System.out.println("-".repeat(83));
+                }        
                 break;
                 
             case "PODCAST":
-                if (this.podcasts.size() != 0) {
-                    for (Podcast podcast : this.podcasts) {
-                        System.out.println("-".repeat(85));
-                        try {
-                            podcast.play();
-                        } catch (MediaNotFoundException e) {
-                            System.err.println(e.getMessage());
-                        }
-                        System.out.println("-".repeat(85));
-                    }        
-                } else
+                if (this.podcasts.isEmpty()) {
                     mediaExists = false;
+                    break;
+                }
+                for (Podcast podcast : this.podcasts) {
+                    System.out.println("-".repeat(83));
+                    try {
+                        podcast.play();
+                    } catch (MediaNotFoundException e) {
+                        System.err.println(e.getMessage());
+                    }
+                    System.out.println("-".repeat(83));
+                }        
                 break;
                 
             case "SHORTCLIP":
-                if (this.shortClips.size() != 0) {
-                    for (ShortClip shortClip : this.shortClips) {
-                        System.out.println("-".repeat(85));
-                        try {
-                            shortClip.play();
-                        } catch (MediaNotFoundException e) {
-                            System.err.println(e.getMessage());
-                        }
-                        System.out.println("-".repeat(85));
-                    }        
-                } else
+                if (this.shortClips.isEmpty()) {
                     mediaExists = false;
+                    break;
+                }
+                for (ShortClip shortClip : this.shortClips) {
+                    System.out.println("-".repeat(83));
+                    try {
+                        shortClip.play();
+                    } catch (MediaNotFoundException e) {
+                        System.err.println(e.getMessage());
+                    }
+                    System.out.println("-".repeat(83));
+                }        
                 break;
         }
         if (!mediaExists)
-            System.out.printf("No %s in the playlist to play.\n", this.mediaType.toLowerCase());
+            throw new MediaNotFoundException("No " + this.mediaType.toLowerCase() + " in the playlist to play.");
+
     }
 
-    public void displayMedia() {
+    public void displayMedia() throws MediaNotFoundException {
         boolean mediaExists = true;
         switch (this.mediaType) {
             case "SONG":
-                if (this.songs.size() != 0) {
-                    System.out.printf(Constants.SONG_PLAYLIST_HEADER, "Id", "Title", "Artist Name", "Description", "Genre", "Duration In Mins");
-                    System.out.println("-".repeat(125));
-                    for (int i = 0; i < this.songs.size(); i++)
-                        this.songs.get(i).displayDetails(i);
-                } else
+                if (this.songs.isEmpty()) {
                     mediaExists = false;
+                    break;
+                }
+                System.out.printf(Constants.SONG_PLAYLIST_HEADER, "Id", "Title", "Artist Name", "Description", "Genre", "Duration In Mins");
+                System.out.println("-".repeat(125));
+                for (int i = 0; i < this.songs.size(); i++)
+                    this.songs.get(i).displayDetails(i);
                 break;
                 
             case "PODCAST":
-                if (this.podcasts.size() != 0) {
-                    System.out.printf(Constants.PODCAST_PLAYLIST_HEADER, "Id", "Title", "Host Name(s)", "Description", "Category", "Series Name", "Episode#", "Duration In Mins");
-                    System.out.println("-".repeat(125));
-                    for (int i = 0; i < this.podcasts.size(); i++)
-                        this.podcasts.get(i).displayDetails(i);
-                } else
+                if (this.podcasts.isEmpty()) {
                     mediaExists = false;
+                    break;
+                }
+                System.out.printf(Constants.PODCAST_PLAYLIST_HEADER, "Id", "Title", "Host Name(s)", "Description", "Category", "Series Name", "Episode#", "Duration In Mins");
+                System.out.println("-".repeat(160));
+                for (int i = 0; i < this.podcasts.size(); i++)
+                    this.podcasts.get(i).displayDetails(i);
                 break;
                 
             case "SHORTCLIP":
-                if (this.shortClips.size() != 0) {
-                    System.out.printf(Constants.SHORTCLIP_PLAYLIST_HEADER, "Id", "Title", "Artist Name", "Description", "Duration In Mins");
-                    System.out.println("-".repeat(115));
-                    for (int i = 0; i < this.shortClips.size(); i++)
-                        this.shortClips.get(i).displayDetails(i);
-                } else
+                if (this.shortClips.isEmpty()) {
                     mediaExists = false;
+                    break;
+                }
+                System.out.printf(Constants.SHORTCLIP_PLAYLIST_HEADER, "Id", "Title", "Artist Name", "Description", "Duration In Mins");
+                System.out.println("-".repeat(114));
+                for (int i = 0; i < this.shortClips.size(); i++)
+                    this.shortClips.get(i).displayDetails(i);
                 break;
         }
         if (!mediaExists)
-            System.out.printf("No %s in the playlist to view.\n", this.mediaType.toLowerCase());
+            throw new MediaNotFoundException("No " + this.mediaType.toLowerCase() + " in the playlist to view.");
     }
 
     public boolean matchName (String name) {
-        if (this.name.toLowerCase().equals(name.toLowerCase()))
+        if (this.name.equalsIgnoreCase(name.toLowerCase()))
             return true;
         else
             return false;
@@ -209,55 +210,59 @@ public class Playlist {
         do {
             this.printModifyMenu();
             modyifyChoice = Constants.keyboard.nextLine();
-            switch (modyifyChoice) {
-                case "1":
-                    this.displayMedia();
-                    break;
-    
-                case "2":
-                    try {
-                        switch (this.mediaType) {
-                            case "SONG":
-                                if (this.songs.size() == 5)
-                                    throw new PlayListFullException("Playlist %s is full. You cannot add new %s to this playlist.");
-                                this.songs.add(new Song());
-                                break;
-                            case "PODCAST":
-                                if (this.podcasts.size() == 5)
-                                    throw new PlayListFullException("Playlist %s is full. You cannot add new %s to this playlist.");
-                                this.podcasts.add(new Podcast());
-                                break;
-                            case "SHORTCLIP":
-                                if (this.shortClips.size() == 5)
-                                    throw new PlayListFullException("Playlist %s is full. You cannot add new %s to this playlist.");
-                                this.shortClips.add(new ShortClip());
-                                break;
+            try {
+                switch (modyifyChoice) {
+                    case "1":
+                        try {
+                            this.displayMedia();
+                        } catch (MediaNotFoundException e) {
+                            System.err.println(e.getMessage());
                         }
-                    } catch (PlayListFullException e) {
-                        System.err.println(e.getMessage());
-                    }
-                    break;
-                
-                case "3":
-                    System.out.printf("Enter the %s to remove: ", this.mediaType.toLowerCase());
-                    String mediaName = Constants.keyboard.nextLine();
-                    switch (this.mediaType) {
-                        case "SONG":
-                            for (Song song : this.songs)
-                                if (song.getName().equals(mediaName))
-                                    this.songs.remove(song);
+                        break;
+        
+                    case "2":
+                        try {
+                            this.addMedia();
+                        } catch (PlayListFullException e) {
+                            System.err.println(e.getMessage());
+                        }
+                        break;
+                    
+                    case "3":
+                        if (this.songs.isEmpty() && this.podcasts.isEmpty() && this.shortClips.isEmpty())
+                            throw new MediaNotFoundException("You can not remove media from an empty list.");
+                        System.out.printf("Enter the %s to remove: ", this.mediaType.toLowerCase());
+                        String mediaName = Constants.keyboard.nextLine();
+                            switch (this.mediaType) {
+                                case "SONG":
+                                    for (Song song : this.songs)
+                                        if (song.getName().equalsIgnoreCase(mediaName)) {
+                                            this.songs.remove(song);
+                                            System.out.println("Media removed successfully.");
+                                            break;
+                                        }
+                                    break;
+                                case "PODCAST":
+                                    for (Podcast podcast : this.podcasts)
+                                        if (podcast.getName().equalsIgnoreCase(mediaName)) {
+                                            this.podcasts.remove(podcast);
+                                            System.out.println("Media removed successfully.");
+                                            break;
+                                        }
+                                    break;
+                                case "SHORTCLIP":
+                                    for (ShortClip shortClip : this.shortClips)
+                                        if (shortClip.getName().equalsIgnoreCase(mediaName)) {
+                                            this.shortClips.remove(shortClip);
+                                            System.out.println("Media removed successfully.");
+                                            break;
+                                        }
+                                    break;
+                            }
                             break;
-                        case "PODCAST":
-                            for (Podcast podcast : this.podcasts)
-                                if (podcast.getName().equals(mediaName))
-                                    this.podcasts.remove(podcast);
-                            break;
-                        case "SHORTCLIP":
-                            for (ShortClip shortClip : this.shortClips)
-                                if (shortClip.getName().equals(mediaName))
-                                    this.shortClips.remove(shortClip);
-                            break;
-                    }
+                        }
+            } catch (MediaNotFoundException e) {
+                System.err.println(e.getMessage());
             }
         } while (!modyifyChoice.equals("4"));
     }
@@ -272,10 +277,10 @@ public class Playlist {
 
     public void writeFiles() throws IOException {
         PrintWriter output = new PrintWriter(new FileOutputStream("data/playlist/" + fileName));
-        if (this.mediaType.equals("SONG"))
+        if (this.mediaType.equalsIgnoreCase("SONG"))
             for (Song song : this.songs)
                 output.println(song);
-        else if (this.mediaType.equals("PODCAST"))
+        else if (this.mediaType.equalsIgnoreCase("PODCAST"))
             for (Podcast podcast : this.podcasts)
                output.println(podcast);
         else

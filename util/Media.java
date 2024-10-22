@@ -10,7 +10,7 @@ public class Media {
     private ArrayList<String> creators = new ArrayList<>();
     private int duration;
     private String captionFile;
-    private String captions;
+    private String captions = "";
 
     public Media() {
         String input;

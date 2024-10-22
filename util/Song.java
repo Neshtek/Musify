@@ -15,9 +15,9 @@ public class Song extends Media {
         do {
             System.out.print("Enter the artist Name or Q to stop entering the artist name: ");
             input = Constants.keyboard.nextLine();
-            if (!input.toUpperCase().equals("Q"))
+            if (!input.equalsIgnoreCase("Q"))
                 super.setCreator(input);
-        } while (!input.toUpperCase().equals("Q"));
+        } while (!input.equalsIgnoreCase("Q"));
     }
 
     public Song (String[] args) {
@@ -30,8 +30,8 @@ public class Song extends Media {
     }
 
     public void play() throws MediaNotFoundException {
-        System.out.printf("Playing Song: %s by %s for %d mins.", super.getName(), super.getCreators(), super.getDuration());
-        if (super.getCaptions().equals(""))
+        System.out.printf("Playing Song: %s by %s for %d mins.\n", super.getName(), super.getCreators(), super.getDuration());
+        if (super.getCaptions().equalsIgnoreCase(""))
             throw new MediaNotFoundException("Cannot show lyrics. Media not found.");
         else {
             System.out.println("Here are the lyrics to sing along.");
@@ -40,6 +40,6 @@ public class Song extends Media {
     }
 
     public String toString() {
-        return String.join(",", super.getName(), super.getDescription(), super.getCreatorsForFile(), this.genre, Integer.toString(super.getDuration()), super.getCaptionFile());
+        return String.join(",", super.getName(), super.getDescription(), super.getCreatorsForFile(), this.genre.toUpperCase(), Integer.toString(super.getDuration()), super.getCaptionFile());
     }
 }

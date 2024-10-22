@@ -20,8 +20,8 @@ public class ShortClip extends Media {
     }
 
     public void play() throws MediaNotFoundException {
-        System.out.printf("Playing short clip: %s by %s for %d mins.", super.getName(), super.getCreators(), super.getDuration());
-        if (super.getCaptions().equals(""))
+        System.out.printf("Playing short clip: %s by %s for %d mins.\n", super.getName(), super.getCreators(), super.getDuration());
+        if (super.getCaptions().equalsIgnoreCase(""))
             throw new MediaNotFoundException("Cannot show captions for short clip. Media not found.");
         else {
             System.out.println("Here are the contents of the short clip.");
