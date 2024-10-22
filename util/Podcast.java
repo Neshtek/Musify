@@ -1,5 +1,6 @@
 package util;
 
+import error.MediaNotFoundException;
 import extra.*;
 
 public class Podcast extends Media {
@@ -36,5 +37,19 @@ public class Podcast extends Media {
 
     public void displayDetails(int index) {
         System.out.printf(Constants.PODCAST_DATA_FORMATTER, (index + 1), super.getName(), super.getCreators(), super.getDescription(), this.category, this.seriesName, this.episodeNo, super.getDuration());
+    }
+
+    public void play() throws MediaNotFoundException {
+        System.out.printf("Playing Podcast: %s by %s for %d mins. This podcast is about %s.", super.getName(), super.getCreators(), super.getDuration(), super.getDescription());
+        if (super.getCaptions().equals(""))
+            throw new MediaNotFoundException("Cannot show captions for podcast. Media not found.");
+        else {
+            System.out.println("Here are the contents of the podcast.");
+            System.out.print(super.getCaptions());
+        }
+    }
+
+    public String toString() {
+        return String.join(",", super.getName(), super.getDescription(), super.getCreatorsForFile(), this.category, this.seriesName, Integer.toString(this.episodeNo), Integer.toString(super.getDuration()), super.getCaptionFile());
     }
 }

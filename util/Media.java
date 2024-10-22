@@ -10,6 +10,7 @@ public class Media {
     private ArrayList<String> creators;
     private int duration;
     private String captionFile;
+    private String captions;
 
     public Media() {
         String input;
@@ -25,7 +26,11 @@ public class Media {
         System.out.print("Enter the filename for the captions or lyrics: ");
         input = Constants.keyboard.nextLine();
         this.captionFile = input;
-        Media.checkCaptionExists(input);
+        Scanner fileReader = Media.checkCaptionExists(input);
+        this.captions = "";
+        if (fileReader != null)
+            this.storeCaptions(fileReader);
+        fileReader.close();
     }
 
     public Media (String name, String description, String creators, String duration, String captionFile) {
@@ -37,14 +42,27 @@ public class Media {
             this.creators.add(creator);
         this.duration = Integer.parseInt(duration);
         this.captionFile = captionFile;
+        Scanner fileReader = Media.checkCaptionExists(captionFile);
+        this.captions = "";
+        if (fileReader != null)
+            this.storeCaptions(fileReader);
+        fileReader.close();
     }
 
-    public static void checkCaptionExists (String captionFile) {
+    public static Scanner checkCaptionExists (String captionFile) {
         try {
             Scanner fileReader = new Scanner(new FileInputStream("data/mediatext/" + captionFile));
             fileReader.close();
+            return fileReader;
         } catch (IOException e) {
             System.err.println("Invalid or missing caption file.");
+            return null;
+        }
+    }
+
+    private void storeCaptions(Scanner fileReader) {
+        while (fileReader.hasNextLine()) {
+            this.captions += fileReader.nextLine() + "\n";
         }
     }
 
@@ -57,12 +75,11 @@ public class Media {
     }
 
     protected String getCreators() {
-        String creators = this.creators.get(0);
-        if (this.creators.size() > 1)
-            for (int i = 1; i < this.creators.size(); i++) {
-                creators += "," + this.creators.get(i);
-            }
-        return creators;
+        return String.join(",", this.creators);
+    }
+
+    protected String getCreatorsForFile() {
+        return String.join("#", this.creators);
     }
 
     protected String getDescription() {
@@ -71,5 +88,13 @@ public class Media {
     
     protected int getDuration() {
         return this.duration;
+    }
+
+    protected String getCaptions() {
+        return this.captions;
+    }
+
+    protected String getCaptionFile() {
+        return this.captionFile;
     }
 }

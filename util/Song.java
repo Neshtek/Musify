@@ -1,5 +1,6 @@
 package util;
 
+import error.MediaNotFoundException;
 import extra.*;
 
 public class Song extends Media {
@@ -26,5 +27,19 @@ public class Song extends Media {
 
     public void displayDetails(int index) {
         System.out.printf(Constants.SONG_PLAYLIST_DATA_FORMATTER, (index + 1), super.getName(), super.getCreators(), super.getDescription(), this.genre, super.getDuration());
+    }
+
+    public void play() throws MediaNotFoundException {
+        System.out.printf("Playing Song: %s by %s for %d mins.", super.getName(), super.getCreators(), super.getDuration());
+        if (super.getCaptions().equals(""))
+            throw new MediaNotFoundException("Cannot show lyrics. Media not found.");
+        else {
+            System.out.println("Here are the lyrics to sing along.");
+            System.out.print(super.getCaptions());
+        }
+    }
+
+    public String toString() {
+        return String.join(",", super.getName(), super.getDescription(), super.getCreatorsForFile(), this.genre, Integer.toString(super.getDuration()), super.getCaptionFile());
     }
 }

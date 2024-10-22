@@ -1,5 +1,6 @@
 package util;
 
+import error.MediaNotFoundException;
 import extra.*;
 
 public class ShortClip extends Media {
@@ -16,5 +17,19 @@ public class ShortClip extends Media {
 
     public void displayDetails(int index) {
         System.out.printf(Constants.SHORTCLIP_DATA_FORMATTER, (index + 1), super.getName(), super.getCreators(), super.getDescription(), super.getDuration());
+    }
+
+    public void play() throws MediaNotFoundException {
+        System.out.printf("Playing short clip: %s by %s for %d mins.", super.getName(), super.getCreators(), super.getDuration());
+        if (super.getCaptions().equals(""))
+            throw new MediaNotFoundException("Cannot show captions for short clip. Media not found.");
+        else {
+            System.out.println("Here are the contents of the short clip.");
+            System.out.print(super.getCaptions());
+        }
+    }
+
+    public String toString() {
+        return String.join(",", super.getName(), super.getDescription(), super.getCreatorsForFile(), Integer.toString(super.getDuration()), super.getCaptionFile());
     }
 }

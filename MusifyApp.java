@@ -49,8 +49,6 @@ public class MusifyApp {
 
     private void storeMedia (Scanner fileReader, Playlist playlist) {
         String[] fileDetails;
-        String captionFile = null;
-        String duration = null;
         boolean flag;
         while (fileReader.hasNextLine()) {
             try {
@@ -63,7 +61,6 @@ public class MusifyApp {
                     flag = checkFormat(fileDetails[4]);
                     if (!flag)
                         throw new InvalidFormatException("Duration in mins not in correct format. Skipping this line.");
-                    captionFile = fileDetails[5];
                     playlist.addSongs(new Song(fileDetails));                    
                 } else if (playlist.getMediaType().equals("PODCAST")) {
                     if (fileDetails.length != 8)
@@ -76,7 +73,6 @@ public class MusifyApp {
                     flag = checkFormat(fileDetails[5]);
                     if (!flag)
                         throw new InvalidFormatException("Episode number not in correct format. Skipping this line.");
-                    captionFile = fileDetails[7];                  
                     playlist.addPodcasts(new Podcast(fileDetails));                    
                 } else {
                     if (fileDetails.length != 5)
@@ -84,7 +80,6 @@ public class MusifyApp {
                     flag = checkFormat(fileDetails[3]);
                     if (!flag)
                         throw new InvalidFormatException("Duration in mins not in correct format. Skipping this line.");
-                    captionFile = fileDetails[4]; 
                     playlist.addShortClips(new ShortClip(fileDetails));                    
                 }
             } catch (InvalidLineException e) {
@@ -92,7 +87,6 @@ public class MusifyApp {
             } catch (InvalidFormatException e) {
                 System.err.println(e.getMessage());
             }
-            Media.checkCaptionExists(captionFile);
         }
     }
 
@@ -110,6 +104,7 @@ public class MusifyApp {
     private void displayPlaylists() {
         System.out.println("Here are your playlists-");
         System.out.printf(Constants.PLAYLIST_HEADER_FORMATTER, "#", "Type", "Playlist Name");
+        System.out.println("-".repeat(47));
         for (int i = 0; i < this.playlists.size(); i++) {
             System.out.printf(Constants.PLAYLIST_FORMATTER, (i + 1), this.playlists.get(i).getMediaType(), this.playlists.get(i).getName());
         }
@@ -170,13 +165,34 @@ public class MusifyApp {
                         }
                     }
                     break;
-
-                case "6":
                     
+                case "5":
+                    System.out.print("Enter Playlist Name: ");
+                    playlistName = Constants.keyboard.nextLine();
+                    for (Playlist playlist : this.playlists) {
+                        if (playlist.matchName(playlistName)) {
+                            playlist.runModifyMenu();
+                        }
+                    }
                     break;
 
+                case "6":
+                    System.out.print("Enter Playlist Name: ");
+                    playlistName = Constants.keyboard.nextLine();
+                    for (Playlist playlist : this.playlists) {
+                        if (playlist.matchName(playlistName)) {
+                            playlist.play();
+                        }
+                    }
+                    break;
             }
         } while (!menuChoice.equals("7"));
+        try {
+            this.writeFiles();
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+        System.out.printf("Exiting Musify. Goodbye, %s.", this.userName);
     }
 
     private void printMainMenu() {
@@ -197,5 +213,18 @@ public class MusifyApp {
             System.out.println("Data loading complete.");
         System.out.printf("Welcome %s. Choose your music, podcasts or watch short clips.Please select one of the options.\n", this.userName);
     }
-}
 
+    private void writeFiles() throws IOException {
+        PrintWriter output;
+        if (this.playlistListFile == null)
+            output = new PrintWriter(new FileOutputStream("data/playlists.txt"));
+        else
+            output = new PrintWriter(new FileOutputStream("data/" + playlistListFile));    
+        for (Playlist playlist : this.playlists) {
+            output.println(playlist);
+            playlist.writeFiles();
+        }
+        output.close();
+        System.out.println("Playlist data saved.");
+    }
+}
