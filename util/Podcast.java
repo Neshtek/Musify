@@ -3,11 +3,19 @@ package util;
 import error.MediaNotFoundException;
 import extra.*;
 
+/**
+ * This class is for all Podcast data extended over Media and implementing the MediaType interface.
+ * @version ver 1.0
+ * @author Neelaksh Tayal 1627659
+ */
 public class Podcast extends Media implements MediaType {
     private String category;
     private String seriesName;
     private int episodeNo;
 
+    /**
+     * Default Constructor. Creates a new podcast object using user inputs.
+     */
     public Podcast() {
         super();
         String input;
@@ -28,6 +36,10 @@ public class Podcast extends Media implements MediaType {
         this.episodeNo = Integer.parseInt(input);
     }
 
+    /**
+     * Creates a new Podcast object based on file data.
+     * @param args file data passed as a String array.
+     */
     public Podcast (String[] args) {
         super(args[0], args[1], args[2], args[6], args[7]);
         this.category = args[3];

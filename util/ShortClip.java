@@ -3,7 +3,15 @@ package util;
 import error.MediaNotFoundException;
 import extra.*;
 
+/**
+ * This class is for all ShortClip data extended over Media and implementing the MediaType interface.
+ * @version ver 1.0
+ * @author Neelaksh Tayal 1627659
+ */
 public class ShortClip extends Media implements MediaType {
+    /**
+     * Default Constructor. Creates a new shortclip object by taking in values from the user.
+     */
     public ShortClip() {
         super();
         System.out.print("Enter the artist Name: ");
@@ -11,6 +19,10 @@ public class ShortClip extends Media implements MediaType {
         super.setCreator(input);
     }
 
+    /**
+     * Creates a new ShortClip object based on file data.
+     * @param args file data passed as a String array.
+     */
     public ShortClip (String[] args) {
         super(args[0], args[1], args[2], args[3], args[4]);
     }

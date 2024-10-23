@@ -3,9 +3,17 @@ package util;
 import error.MediaNotFoundException;
 import extra.*;
 
+/**
+ * This class is for all ShortClip data extended over Media and implementing the MediaType interface.
+ * @version ver 1.0
+ * @author Neelaksh Tayal 1627659
+ */
 public class Song extends Media implements MediaType {
     private String genre;
 
+    /**
+     * Default Constructor. Creates a new song object by taking in values from the user.
+     */
     public Song() {
         super();
         String input;
@@ -20,6 +28,10 @@ public class Song extends Media implements MediaType {
         } while (!input.equalsIgnoreCase("Q"));
     }
 
+    /**
+     * Creates a new Song object based on file data.
+     * @param args file data passed as a String array.
+     */
     public Song (String[] args) {
         super(args[0], args[1], args[2], args[4], args[5]);
         this.genre = args[3];

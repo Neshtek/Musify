@@ -353,6 +353,10 @@ public class Playlist {
         output.close();
     }
 
+    /**
+     * Java standard toString method to convert all details of an object to string.
+     * @return String value containing relevant details while printing.
+     */
     public String toString() {
         return String.join(",", this.name, this.mediaType, this.fileName);
     }
